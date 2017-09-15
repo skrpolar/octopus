@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        #render {
+            display: flex;
+        }
+
+        ul>li {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: #f9f9f9;
+        }
+
+        ul>li:hover {
+            background: #e9e9e9;
+            cursor: pointer;
+        }
+
+        div>img {
+            max-width: 680px;
+        }
+    </style>
+    <title></title>
+</head>
+
+<body>
+    <div id="render">
+        <ul style="list-style-type:none;width:5rem;">
+        </ul>
+
+        <div>
+            <div>
+                <span id="name"></span>
+            </div>
+            <img id="i">
+            <div>
+                <span id="clicks">0</span><span> Clicks</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin">
+        <button id="ad_click">Admin</button>
+        <div id="ad_content">
+            <div>
+                <div><span>name</span><input type="text" id="name_input"></div>
+                <div><span>src</span><input type="text" id="src_input"></div>
+                <div><span>clicks</span><input type="text" id="clicks_input"></div>
+            </div>
+            <button id="save">Save</button><button id="cancel">Cancel</button>
+        </div>
+    </div>
+</body>
+<script>
+    var model = {
+        init: function () {
+            this.data = [
+                {
+                    n: 0,
+                    name: 'cat1',
+                    path: '1.jpg',
+                    clicks: 0
+                },
+                {   
+                    n: 1,
+                    name: 'cat2',
+                    path: '2.jpg',
+                    clicks: 0
+                },
+                {
+                    n: 2,
+                    name: 'cat3',
+                    path: '3.jpg',
+                    clicks: 0
+                },
+                {
+                    n: 3,
+                    name: 'cat4',
+                    path: '4.jpg',
+                    clicks: 0
+                },
+                { 
+                    n: 4,
+                    name: 'cat5',
+                    path: '5.jpg',
+                    clicks: 0
+                }
+            ];
+
+            this.admin = false;
+        },
+
+        catClick: function (name) {
+            for (var i in this.data) {
+                if (this.data[i].n == name) {
+                    var z = this.data[i].clicks;
+                    z++;
+                    this.data[i].clicks = z;
+                }
+            }
+        },
+
+        changeAdmin: function () {
+            this.admin = !this.admin;
+        },
+
+        getCat: function () {
+            return this.data;
+        },
+
+        getAdmin: function () {
+            return this.admin;
+        },
+
+        changeCat: function (obj) {
+            for (var i in this.data) {
+                if (this.data[i].n == obj.n) {
+                    this.data[i].name = obj.nameI;
+                    this.data[i].path = obj.srcI;
+                    this.data[i].clicks = obj.clicksI;
+                }
+            }
+        }
+    }
+
+    var octopus = {
+        init: function () {
+            model.init();
+            view.init();
+        },
+
+        catClick: function (name) {
+            model.catClick(name);
+            view.render(name);
+        },
+
+        getCat: function () {
+            return model.getCat();
+        },
+
+        adminChange: function () {
+            model.changeAdmin();
+            view.changeAdmin();
+        },
+
+        getAdmin: function () {
+            return model.getAdmin();
+        },
+
+        changeCat: function (obj) {
+            model.changeCat(obj);
+            view.adminRender(obj.n);
+            this.adminChange();
+        }
+    }
+
+    var view = {
+        init: function () {
+            var data = octopus.getCat(),
+                ul = document.getElementsByTagName('ul')[0],
+                im = document.getElementById('i'),
+                c = document.getElementById('clicks'),
+                n = document.getElementById('name'),
+                adClick = document.getElementById('ad_click'),
+                cancel = document.getElementById('cancel'),
+                nameInput = document.getElementById('name_input'),
+                srcInput = document.getElementById('src_input'),
+                clicksInput = document.getElementById('clicks_input');
+
+            for (let i = 0; i < data.length; i++) {
+                var li = document.createElement('li');
+                li.innerText = data[i].name;
+                ((i) => {
+                    li.addEventListener('click', () => {
+                        im.src = data[i].path;
+                        im.setAttribute('name', data[i].n);
+                        n.innerText = data[i].name;
+                        c.innerText = data[i].clicks;
+                    });
+                })(i);
+                ul.appendChild(li);
+            }
+
+            im.addEventListener('click', () => {
+                octopus.catClick(im.name);
+            });
+
+            adClick.addEventListener('click', () => {
+                octopus.adminChange();
+            });
+
+            cancel.addEventListener('click', () => {
+                octopus.adminChange();
+            });
+
+            save.addEventListener('click', () => {
+                octopus.changeCat({
+                    n: im.name,
+                    nameI: nameInput.value,
+                    srcI: srcInput.value,
+                    clicksI: clicksInput.value,
+                });
+            });
+
+            im.src = data[0].path;
+            im.setAttribute('name', data[0].n);
+            n.innerText = data[0].name;
+            c.innerText = data[0].clicks;
+
+            this.changeAdmin();
+        },
+
+        render: function (name) {
+            var data = octopus.getCat();
+            var c = document.getElementById('clicks');
+            for (var i in data) {
+                if (data[i].n == name) {
+                    c.innerText = data[i].clicks;
+                }
+            }
+        },
+
+        changeAdmin: function () {
+            var adContent = document.getElementById('ad_content');
+            var state = octopus.getAdmin();
+            if (state) {
+                adContent.style.display = 'block';
+            } else {
+                adContent.style.display = 'none';
+            }
+        },
+
+        adminRender: function (nx) {
+            var data = octopus.getCat(),
+                im = document.getElementById('i'),
+                c = document.getElementById('clicks'),
+                n = document.getElementById('name');
+
+            for (var i in data) {
+                if (data[i].n == nx) {
+                    im.src = data[i].path;
+                    n.innerText = data[i].name;
+                    c.innerText = data[i].clicks;
+                }
+            }
+        }
+    }
+
+    octopus.init();
+
+</script>
+
+</html>
